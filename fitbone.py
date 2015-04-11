@@ -5,6 +5,8 @@ __author__ = 'rcourtney'
 
 import datetime
 import flask
+import httplib
+import os.path
 import requests_oauthlib
 import time
 
@@ -210,6 +212,20 @@ def sleep(day):
     return upout
 
 
+@app.route('/updates', methods=['GET', 'POST'])
+def updates():
+    if flask.request.method == 'POST':
+        # write the file
+        with open('updates.txt', 'a') as ufile:
+            ufile.write('<p>called</p>\n')
+        return ('', httplib.NO_CONTENT)
+    else:
+        #print the file
+        if os.path.isfile('updates.txt'):
+            with open('updates.txt', 'r') as ufile:
+                return ufile.read()
+        else:
+            return 'no updates'
 
 @app.route("/")
 def hello():
@@ -222,4 +238,4 @@ def hello():
 
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)
