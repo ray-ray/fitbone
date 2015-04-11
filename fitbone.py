@@ -22,7 +22,7 @@ FITBIT = {
 UP = {
     'client_id': '18pTH7S2vNw',
     'client_secret': '1bae5b035ebfd89e0cbaef096bd25459b3c40734',
-    'redirect_uri': 'http://127.0.0.1:5000/up_authorized',
+    'redirect_uri': 'https://rayfitbone.herokuapp.com/up_authorized',
     'scope': ['move_write', 'sleep_write'],
     'authorization_url': 'https://jawbone.com/auth/oauth2/auth',
     'request_token_url': 'https://jawbone.com/auth/oauth2/token'
@@ -35,19 +35,14 @@ RAY_FITBIT = {
     'resource_owner_key': 'af184e7a25a731392a8071ca1d40c5d1',
     'resource_owner_secret': '2bde71074c7df1027cbe1b95a18987d9'
 }
-RAY_UP = {
-    'access_token': '1O8zKOFbG1E0J96gnHCygEio-eS-Gh4i4U_sYP9oY3gcKR-vM8yvwj534N9DXvkUkKMwPvEBJ55RAnYEZaPxlCzIBmUtBLpsaym2RYjpp5gDwoQTw2eSTw',
+RAYFB_UP = {
     'token_type': 'Bearer',
+    'access_token': 'CHSvNoQb5om1wXUEYtBfcdbO3OUygiP0udWFIDk-HewbMlVM8Vmv6tYOS7m4bqxOGLjyAxLkQUT1jjKD0Abcg1ECdgRlo_GULMgGZS0EumxrKbZFiOmnmAPChBPDZ5JP',
+    'refresh_token': 'fW0MDZjjlhPRF95VOI6bz3kPEBQGORaeluvuD44qR3XdL2WxNgQvKekaCy5aBtavNNWfJhnfRQwlAN2iCODyqw',
     'expires_in': 31536000,
-    'refresh_token': u'iTxs5O8ZbaGINP5oVlRJ_z9XSuz0Ev4Bc0VpGYr1MjbdL2WxNgQvKekaCy5aBtavNNWfJhnfRQwlAN2iCODyqw',
-    'expires_at': 1457337921.875113
+    'expires_at': 1460328229.13737
 }
-RAYFB_UP = {'access_token': 'CHSvNoQb5om1wXUEYtBfcdbO3OUygiP0udWFIDk-Hez-Br0ki8RDhx81qgvVnohcGLjyAxLkQUT1jjKD0Abcg1ECdgRlo_GULMgGZS0EumxrKbZFiOmnmAPChBPDZ5JP',
-            'token_type': 'Bearer',
-            'expires_in': 31536000,
-            'refresh_token': u'fW0MDZjjlhPRF95VOI6bz3kPEBQGORaeluvuD44qR3XdL2WxNgQvKekaCy5aBtavNNWfJhnfRQwlAN2iCODyqw',
-            'expires_at': 1457399245.746663
-}
+
 
 @app.route('/fitbit_login')
 def fitbit_login():
@@ -163,9 +158,20 @@ def up_profile():
     """
     oauth = requests_oauthlib.OAuth2Session(
         UP['client_id'],
-        token=RAY_UP)
+        token=RAYFB_UP)
     r = oauth.get('https://jawbone.com/nudge/api/v.1.1/users/@me')
     return '%s' % r.json()
+
+
+@app.route('/fb_subscribe')
+def fb_subscribe():
+    fb_oauth = requests_oauthlib.OAuth1Session(
+        FITBIT['client_key'],
+        client_secret=FITBIT['client_secret'],
+        resource_owner_key=RAY_FITBIT['resource_owner_key'],
+        resource_owner_secret=RAY_FITBIT['resource_owner_secret'])
+    fbr = fb_oauth.post('https://api.fitbit.com/1/user/-/apiSubscriptions/1.json')
+    return '%s<br>%s' % (fbr.status_code, fbr.json())
 
 
 @app.route('/move/<day>')
