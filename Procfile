@@ -1,0 +1,1 @@
+web: gunicorn fitbone:app --log-file -

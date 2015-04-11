@@ -1,7 +1,5 @@
 """
 Flask app to connect Fitbit to UP.
-
-Dummy update
 """
 __author__ = 'rcourtney'
 
@@ -224,4 +222,4 @@ def hello():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()
