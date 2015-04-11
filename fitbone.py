@@ -223,7 +223,7 @@ def updates():
     if flask.request.method == 'POST':
         # write the file
         with open('updates.txt', 'a') as ufile:
-            ufile.write('<p>called</p>\n')
+            ufile.write('<p>%s</p>\n' % flask.request.get_json())
         return ('', httplib.NO_CONTENT)
     else:
         #print the file
