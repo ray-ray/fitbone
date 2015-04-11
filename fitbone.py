@@ -3,8 +3,10 @@ Flask app to connect Fitbit to UP.
 """
 __author__ = 'rcourtney'
 
+import datetime
 import flask
 import requests_oauthlib
+import time
 
 app = flask.Flask(__name__)
 
@@ -19,7 +21,7 @@ UP = {
     'client_id': '18pTH7S2vNw',
     'client_secret': '1bae5b035ebfd89e0cbaef096bd25459b3c40734',
     'redirect_uri': 'http://127.0.0.1:5000/up_authorized',
-    'scope': [],
+    'scope': ['move_write', 'sleep_write'],
     'authorization_url': 'https://jawbone.com/auth/oauth2/auth',
     'request_token_url': 'https://jawbone.com/auth/oauth2/token'
 }
@@ -38,7 +40,12 @@ RAY_UP = {
     'refresh_token': u'iTxs5O8ZbaGINP5oVlRJ_z9XSuz0Ev4Bc0VpGYr1MjbdL2WxNgQvKekaCy5aBtavNNWfJhnfRQwlAN2iCODyqw',
     'expires_at': 1457337921.875113
 }
-
+RAYFB_UP = {'access_token': 'CHSvNoQb5om1wXUEYtBfcdbO3OUygiP0udWFIDk-Hez-Br0ki8RDhx81qgvVnohcGLjyAxLkQUT1jjKD0Abcg1ECdgRlo_GULMgGZS0EumxrKbZFiOmnmAPChBPDZ5JP',
+            'token_type': 'Bearer',
+            'expires_in': 31536000,
+            'refresh_token': u'fW0MDZjjlhPRF95VOI6bz3kPEBQGORaeluvuD44qR3XdL2WxNgQvKekaCy5aBtavNNWfJhnfRQwlAN2iCODyqw',
+            'expires_at': 1457399245.746663
+}
 
 @app.route('/fitbit_login')
 def fitbit_login():
@@ -112,7 +119,8 @@ def up_login():
     """
     oauth = requests_oauthlib.OAuth2Session(
         UP['client_id'],
-        redirect_uri=UP['redirect_uri'])
+        redirect_uri=UP['redirect_uri'],
+        scope=UP['scope'])
     authorization_url, state = oauth.authorization_url(
         UP['authorization_url'])
     return flask.redirect(authorization_url)
@@ -156,6 +164,51 @@ def up_profile():
         token=RAY_UP)
     r = oauth.get('https://jawbone.com/nudge/api/v.1.1/users/@me')
     return '%s' % r.json()
+
+
+@app.route('/move/<day>')
+def move(day):
+    fb_oauth = requests_oauthlib.OAuth1Session(
+        FITBIT['client_key'],
+        client_secret=FITBIT['client_secret'],
+        resource_owner_key=RAY_FITBIT['resource_owner_key'],
+        resource_owner_secret=RAY_FITBIT['resource_owner_secret'])
+    fbr = fb_oauth.get('https://api.fitbit.com/1/user/-/activities/tracker/steps/date/%s/1d.json' % day)
+
+    up_oauth = requests_oauthlib.OAuth2Session(
+        UP['client_id'],
+        token=RAYFB_UP)
+    upr = up_oauth.post('https://jawbone.com/nudge/api/v.1.1/moves')
+
+    return '%s<br/>%s' % (fbr.json(), upr.json())
+
+
+@app.route('/sleep/<day>')
+def sleep(day):
+    fb_oauth = requests_oauthlib.OAuth1Session(
+        FITBIT['client_key'],
+        client_secret=FITBIT['client_secret'],
+        resource_owner_key=RAY_FITBIT['resource_owner_key'],
+        resource_owner_secret=RAY_FITBIT['resource_owner_secret'])
+    fbr = fb_oauth.get('https://api.fitbit.com/1/user/-/sleep/date/%s.json' % day)
+    fb_sleeps = []
+    for sleep in fbr.json()['sleep']:
+        start = time.mktime(datetime.datetime.strptime(sleep['startTime'][:19], '%Y-%m-%dT%H:%M:%S').timetuple())
+        inbed = sleep['timeInBed']
+        end = start + (inbed * 60)
+        fb_sleeps.append({'start': start, 'end': end})
+    #fbout = '%s' % fb_sleeps
+    #return fbout
+
+    up_oauth = requests_oauthlib.OAuth2Session(
+        UP['client_id'],
+        token=RAYFB_UP)
+    upout = ''
+    for sleep in fb_sleeps:
+        upr = up_oauth.post('https://jawbone.com/nudge/api/v.1.1/users/@me/sleeps', data={'time_created': sleep['start'], 'time_completed': sleep['end']})
+        upout += '<br/>%s' % upr.json()
+    return upout
+
 
 
 @app.route("/")
