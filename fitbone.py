@@ -37,10 +37,10 @@ RAY_FITBIT = {
 }
 RAYFB_UP = {
     'token_type': 'Bearer',
-    'access_token': 'CHSvNoQb5om1wXUEYtBfcdbO3OUygiP0udWFIDk-HewbMlVM8Vmv6tYOS7m4bqxOGLjyAxLkQUT1jjKD0Abcg1ECdgRlo_GULMgGZS0EumxrKbZFiOmnmAPChBPDZ5JP',
+    'access_token': 'CHSvNoQb5om1wXUEYtBfcdbO3OUygiP0udWFIDk-HewbMlVM8Vmv6nFW8vF9AUYmGLjyAxLkQUT1jjKD0Abcg1ECdgRlo_GULMgGZS0EumxrKbZFiOmnmAPChBPDZ5JP',
     'refresh_token': 'fW0MDZjjlhPRF95VOI6bz3kPEBQGORaeluvuD44qR3XdL2WxNgQvKekaCy5aBtavNNWfJhnfRQwlAN2iCODyqw',
     'expires_in': 31536000,
-    'expires_at': 1460328229.13737
+    'expires_at': 1460329452.795321
 }
 
 
