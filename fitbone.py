@@ -10,7 +10,11 @@ import os.path
 import requests_oauthlib
 import time
 
-app = flask.Flask(__name__)
+#
+# AWS EB is dumB
+#
+application = flask.Flask(__name__)
+app = application
 
 FITBIT = {
     'client_key': '32c172b2fbf94492992f823ab15de74b',
