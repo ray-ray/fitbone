@@ -3,6 +3,8 @@ Flask app to connect Fitbit to UP.
 """
 __author__ = 'rcourtney'
 
+import boto.sqs
+import boto.sqs.jsonmessage
 import datetime
 import flask
 import httplib
@@ -15,6 +17,14 @@ import time
 #
 application = flask.Flask(__name__)
 app = application
+
+#
+# Connect to the SQS queue
+#
+conn = boto.sqs.connect_to_region(
+    "us-west-1")
+q = conn.create_queue('fitbonetest')
+
 
 FITBIT = {
     'client_key': '32c172b2fbf94492992f823ab15de74b',
@@ -228,6 +238,12 @@ def updates():
         # write the file
         with open('updates.txt', 'a') as ufile:
             ufile.write('<p>%s</p>\n' % flask.request.get_json())
+
+        # write the queue
+        jmsg = boto.sqs.jsonmessage.JSONMessage()
+        jmsg.set_body(flask.request.get_json())
+        q.write(jmsg)
+
         return ('', httplib.NO_CONTENT)
     else:
         #print the file
