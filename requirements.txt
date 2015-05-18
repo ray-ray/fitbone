@@ -1,11 +1,30 @@
-Flask==0.10.1
-gunicorn==19.3.0
-httplib2==0.9
-itsdangerous==0.24
-Jinja2==2.7.3
-MarkupSafe==0.23
-oauth2==1.5.211
-oauthlib==0.7.2
-requests==2.5.3
-requests-oauthlib==0.4.2
-Werkzeug==0.10.1
+awsebcli (3.4.2)
+backports.ssl-match-hostname (3.4.0.2)
+boto (2.38.0)
+cement (2.4.0)
+docker-py (1.1.0)
+dockerpty (0.3.2)
+docopt (0.6.2)
+Flask (0.10.1)
+Flask-SQLAlchemy (2.0)
+gunicorn (19.3.0)
+httplib2 (0.9)
+itsdangerous (0.24)
+Jinja2 (2.7.3)
+jmespath (0.7.1)
+MarkupSafe (0.23)
+MySQL-python (1.2.5)
+oauth2 (1.5.211)
+oauthlib (0.7.2)
+pathspec (0.3.3)
+pip (6.1.1)
+python-dateutil (2.4.2)
+PyYAML (3.11)
+requests (2.6.2)
+requests-oauthlib (0.4.2)
+setuptools (15.2)
+six (1.9.0)
+SQLAlchemy (1.0.4)
+texttable (0.8.3)
+websocket-client (0.30.0)
+Werkzeug (0.10.1)
