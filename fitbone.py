@@ -3,9 +3,9 @@ Flask app to connect Fitbit to UP.
 """
 __author__ = 'rcourtney'
 
+
 import boto.sqs
 import boto.sqs.jsonmessage
-import datetime
 import flask
 import flask.ext.sqlalchemy
 import httplib
@@ -13,13 +13,14 @@ import keys
 import os.path
 import requests_oauthlib
 import services.fitbit
-import time
+
 
 #
 # AWS EB is dumB
 #
 application = flask.Flask(__name__)
 app = application
+
 app.config['SQLALCHEMY_DATABASE_URI'] = keys.SQLALCHEMY_DATABASE_URI
 app.secret_key = keys.secret_key
 db = flask.ext.sqlalchemy.SQLAlchemy(app)
@@ -168,10 +169,13 @@ def up_authorized():
         authorization_response=url,
         client_secret=UP['client_secret'])
 
+    #
+    # Update the user's creds and subscribe to Fitbit pubsub.
+    #
     fitbone_user = services.user.get_user(flask.session['uid'])
     services.user.update_up_creds(fitbone_user, tokens)
-    return services.fitbit.subscribe(fitbone_user)
-    #return '%s' % flask.session['uid']
+    services.fitbit.subscribe(fitbone_user)
+    return 'Your Fitbit is now connected to UP!'
 
 
 # @app.route('/up_profile')

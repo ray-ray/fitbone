@@ -65,3 +65,5 @@ pip-selfcheck.json
 
 # Fitbone keys
 keys.py
+keys.tmp
+
