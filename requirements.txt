@@ -1,4 +1,4 @@
-awsebcli==3.4.3
+awsebcli==3.4.4
 backports.ssl-match-hostname==3.4.0.2
 boto==2.38.0
 cement==2.4.0
