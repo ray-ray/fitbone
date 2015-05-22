@@ -7,7 +7,7 @@ __author__ = 'rcourtney'
 
 
 import os
-config = os.environ['FITBONE_CONFIG']
+config = os.environ.get('FITBONE_CONFIG', 'DEV')
 
 
 fitbit_key = '32c172b2fbf94492992f823ab15de74b'
