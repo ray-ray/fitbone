@@ -4,8 +4,7 @@ Flask app to connect Fitbit to UP.
 __author__ = 'rcourtney'
 
 
-import boto.sqs
-import boto.sqs.jsonmessage
+#import boto.sqs
 import flask
 import flask.ext.sqlalchemy
 import httplib
@@ -13,6 +12,7 @@ import keys
 import os.path
 import requests_oauthlib
 import services.fitbit
+import services.up
 
 
 #
@@ -35,8 +35,10 @@ import services.user
 # Connect to the SQS queue
 #
 # conn = boto.sqs.connect_to_region(
-#     "us-west-1")
-# q = conn.create_queue('fitbonetest')
+#     "us-east-1",
+#     aws_access_key_id=keys.aws_key,
+#     aws_secret_access_key=keys.aws_secret)
+# fbq = conn.get_queue('fitbonetest')
 
 
 FITBIT = {
@@ -50,7 +52,7 @@ UP = {
     'client_id': keys.up_id,
     'client_secret': keys.up_secret,
     'redirect_uri': 'http://fitbone.elasticbeanstalk.com/up_authorized',
-    'scope': ['move_write', 'sleep_write'],
+    'scope': ['generic_event_write', 'move_write', 'sleep_write'],
     'authorization_url': 'https://jawbone.com/auth/oauth2/auth',
     'request_token_url': 'https://jawbone.com/auth/oauth2/token'
 }
@@ -255,8 +257,6 @@ def updates():
             ufile.write('<p>%s</p>\n' % flask.request.get_json())
 
         # write the queue
-        jmsg = boto.sqs.jsonmessage.JSONMessage()
-        jmsg.set_body(flask.request.get_json())
         #q.write(jmsg)
 
         return '', httplib.NO_CONTENT
@@ -267,6 +267,21 @@ def updates():
                 return ufile.read()
         else:
             return 'no updates'
+
+
+@app.route('/translate', methods=['POST'])
+def translate():
+    """
+    Translate fitbit pubsubs into UP data.
+
+    :return: 200 response
+    """
+    events = flask.request.get_json()
+    for event in events:
+        fitbone_user = services.user.get_fitbit_user(event['ownerId'])
+        message = event['message']
+        services.up.generic(fitbone_user, message)
+    return ''
 
 
 @app.route("/")
