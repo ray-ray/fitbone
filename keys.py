@@ -9,6 +9,8 @@ __author__ = 'rcourtney'
 import os
 config = os.environ.get('FITBONE_CONFIG', 'DEV')
 
+aws_key = 'AKIAJIAGYSYAVYPHREGA'
+aws_secret = '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'
 
 fitbit_key = '32c172b2fbf94492992f823ab15de74b'
 fitbit_secret = '79c4ee3570ea4633b07f25e8f8c233b4'
