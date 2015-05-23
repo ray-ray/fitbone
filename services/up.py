@@ -7,6 +7,7 @@ __author__ = 'rcourtney'
 import keys
 import requests_oauthlib
 
+
 def timeseries():
     """
     upr = oauth.post('https://jawbone.com/nudge/api/v.1.2/timeseries', data={'data':'[{"type":"steps", "data": [[1431705600, 10],[1431705660, 50]]}]'})

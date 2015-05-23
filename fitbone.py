@@ -4,7 +4,7 @@ Flask app to connect Fitbit to UP.
 __author__ = 'rcourtney'
 
 
-import boto.sqs
+#import boto.sqs
 import flask
 import flask.ext.sqlalchemy
 import httplib
@@ -257,8 +257,6 @@ def updates():
             ufile.write('<p>%s</p>\n' % flask.request.get_json())
 
         # write the queue
-        jmsg = boto.sqs.jsonmessage.JSONMessage()
-        jmsg.set_body(flask.request.get_json())
         #q.write(jmsg)
 
         return '', httplib.NO_CONTENT
