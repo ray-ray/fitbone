@@ -263,6 +263,10 @@ def translate():
 
     :return: 200 response
     """
+    #
+    # Have to force the parse because Elastic Beanstalk Worker doesn't set the
+    # content-type.
+    #
     events = flask.request.get_json(force=True)
     for event in events:
         fitbone_user = services.user.get_fitbit_user(event['ownerId'])
