@@ -4,12 +4,12 @@ Flask app to connect Fitbit to UP.
 __author__ = 'rcourtney'
 
 
-#import boto.sqs
+import boto.sqs
+import boto.sqs.jsonmessage
 import flask
 import flask.ext.sqlalchemy
 import httplib
 import keys
-import os.path
 import requests_oauthlib
 import services.fitbit
 import services.up
@@ -34,11 +34,11 @@ import services.user
 #
 # Connect to the SQS queue
 #
-# conn = boto.sqs.connect_to_region(
-#     "us-east-1",
-#     aws_access_key_id=keys.aws_key,
-#     aws_secret_access_key=keys.aws_secret)
-# fbq = conn.get_queue('fitbonetest')
+conn = boto.sqs.connect_to_region(
+    "us-east-1",
+    aws_access_key_id=keys.aws_key,
+    aws_secret_access_key=keys.aws_secret)
+fbq = conn.get_queue(keys.queue_name)
 
 
 FITBIT = {
@@ -244,29 +244,16 @@ def up_authorized():
 #     return upout
 
 
-@app.route('/updates', methods=['GET', 'POST'])
+@app.route('/updates', methods=['POST'])
 def updates():
     """
-    Record and display the pubsub records.
+    Enqueue the pubsub records.
 
-    :return: 204 on POST, the records on GET
+    :return: 204 response
     """
-    if flask.request.method == 'POST':
-        # write the file
-        with open('updates.txt', 'a') as ufile:
-            ufile.write('<p>%s</p>\n' % flask.request.get_json())
-
-        # write the queue
-        #q.write(jmsg)
-
-        return '', httplib.NO_CONTENT
-    else:
-        #print the file
-        if os.path.isfile('updates.txt'):
-            with open('updates.txt') as ufile:
-                return ufile.read()
-        else:
-            return 'no updates'
+    jmsg = boto.sqs.jsonmessage.JSONMessage(body=flask.request.get_json())
+    fbq.write(jmsg)
+    return '', httplib.NO_CONTENT
 
 
 @app.route('/translate', methods=['POST'])
