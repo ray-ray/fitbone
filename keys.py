@@ -21,6 +21,7 @@ up_secret = '1bae5b035ebfd89e0cbaef096bd25459b3c40734'
 if config == 'LIVE':
     SQLALCHEMY_DATABASE_URI = 'mysql://fitbone:f1tb0n3@aa1y1bjk4eb68b6.cohn5k6lvgpq.us-east-1.rds.amazonaws.com/fitbone'
     debug = False
+    queue_name = 'awseb-e-chb3x3zwin-stack-AWSEBWorkerQueue-ELG26ITCG7YS'
 elif config == 'DEV':
     #
     # mysql> create user 'fitbone'@'localhost' identified by 'fitbone';
@@ -29,5 +30,6 @@ elif config == 'DEV':
     #
     SQLALCHEMY_DATABASE_URI = 'mysql://fitbone:fitbone@/fitbone'
     debug = True
+    queue_name = 'fitbonetest'
 
 secret_key = 'makethisbetterforliveRAY'
