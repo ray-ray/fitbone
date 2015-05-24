@@ -29,7 +29,7 @@ def subscribe(fitbone_user):
     # Make sure subscription succeeds.
     #
     if fbr.status_code != httplib.OK:
-        raise SubscriptionFailure('%s<br>%s' % (fbr.status_code, fbr.json()))
+        raise SubscriptionFailure('%s - %s' % (fbr.status_code, fbr.json()))
 
 
 class SubscriptionFailure(Exception):

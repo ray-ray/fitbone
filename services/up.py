@@ -4,6 +4,7 @@ Wrapper around UP APIs
 __author__ = 'rcourtney'
 
 
+import httplib
 import keys
 import requests_oauthlib
 
@@ -27,6 +28,15 @@ def generic(fitbone_user, note):
     """
     up_tokens = fitbone_user.up_tokens
     up_oauth = requests_oauthlib.OAuth2Session(keys.up_id, token=up_tokens)
-    up_oauth.post(
+    upr = up_oauth.post(
         'https://jawbone.com/nudge/api/v.1.2/users/@me/generic_events',
         data={'verb': 'enqueued', 'title': 'A Message', 'note': note})
+    if upr.status_code != httplib.CREATED:
+        raise GenericEventFailure('%s - %s' % (upr.status_code, upr.json()))
+
+
+class GenericEventFailure(Exception):
+    """
+    Raise if UP generic_event API doesn't return a 201.
+    """
+    pass
