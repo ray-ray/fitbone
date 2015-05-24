@@ -10,6 +10,7 @@ import flask
 import flask.ext.sqlalchemy
 import httplib
 import keys
+import requests
 import requests_oauthlib
 import services.fitbit
 import services.up
@@ -269,6 +270,20 @@ def translate():
         message = event['message']
         services.up.generic(fitbone_user, message)
     return ''
+
+
+@app.route('/worker', methods=['POST'])
+def worker():
+    """
+    The worker just hits the /translate endpoint.
+
+    :return: the response from translate
+    """
+    fbr = requests.post(
+        'http://fitbone.elasticbeanstalk.com/translate',
+        headers={'content-type': 'application/json'},
+        data=flask.request.get_json())
+    return fbr.text, fbr.status_code
 
 
 @app.route("/")
