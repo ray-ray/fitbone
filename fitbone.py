@@ -4,6 +4,7 @@ Flask app to connect Fitbit to UP.
 __author__ = 'rcourtney'
 
 
+
 import boto.sqs
 import boto.sqs.jsonmessage
 import flask
@@ -253,7 +254,7 @@ def updates():
 
     :return: 204 response
     """
-    msg = boto.sqs.message.Message(body=json.dumps(flask.request.get_json()))
+    msg = boto.sqs.jsonmessage.JSONMessage(body=flask.request.get_json())
     fbq.write(msg)
     return '', httplib.NO_CONTENT
 
@@ -266,7 +267,9 @@ def translate():
     :return: 200 response
     """
     print 'RAY %s' % flask.request.data
-    events = flask.request.get_json()
+    jmsg = boto.sqs.jsonmessage.JSONMessage(body=flask.request.get_data())
+    events = jmsg.get_body()
+    print 'RAY2 %s' % events
     # for event in events:
     #     fitbone_user = services.user.get_fitbit_user(event['ownerId'])
     #     message = event['message']
