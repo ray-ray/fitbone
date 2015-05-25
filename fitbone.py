@@ -9,6 +9,7 @@ import boto.sqs.jsonmessage
 import flask
 import flask.ext.sqlalchemy
 import httplib
+import json
 import keys
 import requests
 import requests_oauthlib
@@ -252,8 +253,8 @@ def updates():
 
     :return: 204 response
     """
-    jmsg = boto.sqs.jsonmessage.JSONMessage(body=flask.request.get_json())
-    fbq.write(jmsg)
+    msg = boto.sqs.message.Message(body=json.dumps(flask.request.get_json()))
+    fbq.write(msg)
     return '', httplib.NO_CONTENT
 
 
