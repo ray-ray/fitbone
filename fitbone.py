@@ -265,9 +265,9 @@ def translate():
     :return: 200 response
     """
     events = flask.request.get_json()
-    # for event in events:
+    for event in events:
     #     fitbone_user = services.user.get_fitbit_user(event['ownerId'])
-    #     message = event['message']
+        message = event['message']
     #     services.up.generic(fitbone_user, message)
     return ''
 
