@@ -264,7 +264,7 @@ def translate():
 
     :return: 200 response
     """
-    print flask.request.data
+    print 'RAY %s' % flask.request.data
     events = flask.request.get_json()
     # for event in events:
     #     fitbone_user = services.user.get_fitbit_user(event['ownerId'])
