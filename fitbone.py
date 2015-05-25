@@ -266,9 +266,8 @@ def translate():
 
     :return: 200 response
     """
-    print 'RAY %s' % flask.request.data
     jmsg = boto.sqs.jsonmessage.JSONMessage(body=flask.request.get_data())
-    events = jmsg.get_body()
+    events = jmsg.decode(jmsg.get_body())
     print 'RAY2 %s' % events
     # for event in events:
     #     fitbone_user = services.user.get_fitbit_user(event['ownerId'])
