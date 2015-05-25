@@ -266,7 +266,7 @@ def translate():
     """
     events = flask.request.get_json()
     for event in events:
-    #     fitbone_user = services.user.get_fitbit_user(event['ownerId'])
+        fitbone_user = services.user.get_fitbit_user(event['ownerId'])
         message = event['message']
     #     services.up.generic(fitbone_user, message)
     return ''
