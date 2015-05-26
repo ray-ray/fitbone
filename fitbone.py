@@ -275,20 +275,6 @@ def translate():
     return ''
 
 
-@app.route('/worker', methods=['POST'])
-def worker():
-    """
-    The worker just hits the /translate endpoint.
-
-    :return: the response from translate
-    """
-    fbr = requests.post(
-        'http://fitbone.elasticbeanstalk.com/translate',
-        headers={'content-type': 'application/json'},
-        data=flask.request.get_json())
-    return fbr.text, fbr.status_code
-
-
 @app.route("/")
 def hello():
     """
