@@ -40,6 +40,7 @@ def get_fitbit_user(fitbit_id):
     :param fitbit_id: fitbit user id
     :return: User object
     """
+    print 'RAY2'
     return data.user.User.query.filter_by(fitbit_id=fitbit_id).first()
 
 

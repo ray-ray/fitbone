@@ -269,7 +269,9 @@ def translate():
     jmsg = boto.sqs.jsonmessage.JSONMessage(body=flask.request.get_data())
     events = jmsg.decode(jmsg.get_body())
     for event in events:
+        print 'RAY0'
         fitbone_user = services.user.get_fitbit_user(event['ownerId'])
+        print 'RAY1'
         # message = event['message']
         # services.up.generic(fitbone_user, message)
     return ''
