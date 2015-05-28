@@ -4,7 +4,6 @@ Flask app to connect Fitbit to UP.
 __author__ = 'rcourtney'
 
 
-
 import boto.sqs
 import boto.sqs.jsonmessage
 import flask
@@ -12,7 +11,6 @@ import flask.ext.sqlalchemy
 import httplib
 import json
 import keys
-import requests
 import requests_oauthlib
 import services.fitbit
 import services.up
