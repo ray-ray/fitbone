@@ -64,5 +64,6 @@ pip-selfcheck.json
 !.elasticbeanstalk/*.global.yml
 
 # Fitbone keys
+keys.py
 keys.tmp
 updates.txt

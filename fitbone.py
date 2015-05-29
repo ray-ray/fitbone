@@ -268,8 +268,14 @@ def translate():
     events = jmsg.decode(jmsg.get_body())
     for event in events:
         fitbone_user = services.user.get_fitbit_user(event['ownerId'])
-        message = json.dumps(event)
-        services.up.generic(fitbone_user, message)
+        if event['collectionType'] == 'sleep':
+            fitbit_sleep = services.fitbit.get_sleep(
+                fitbone_user,
+                event['date'])
+            services.up.make_sleep(fitbone_user, fitbit_sleep)
+        else:
+            message = json.dumps(event)
+            services.up.generic(fitbone_user, message)
     return ''
 
 
