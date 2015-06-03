@@ -273,7 +273,16 @@ def translate():
                 fitbone_user,
                 event['date'])
             services.up.make_sleep(fitbone_user, fitbit_sleep)
-        else:
+        elif event['collectionType'] == 'activities':
+            fitbit_steps = services.fitbit.get_steps(
+                fitbone_user,
+                event['date'])
+            services.up.make_steps(fitbone_user, fitbit_steps)
+        elif keys.debug:
+            #
+            # Got an unrecognized collection, if debugging just send the JSON to
+            # the app.
+            #
             message = json.dumps(event)
             services.up.generic(fitbone_user, message)
     return ''

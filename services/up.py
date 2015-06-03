@@ -12,15 +12,6 @@ import requests_oauthlib
 import time
 
 
-def timeseries():
-    """
-    upr = oauth.post('https://jawbone.com/nudge/api/v.1.2/timeseries', data={'data':'[{"type":"steps", "data": [[1431705600, 10],[1431705660, 50]]}]'})
-
-    :return:
-    """
-    pass
-
-
 def generic(fitbone_user, note):
     """
     Create a custom feed nugget.
@@ -61,7 +52,7 @@ def to_unixtime(datestr):
 
 def make_sleep(fitbone_user, fitbit_sleep):
     """
-    Create UP sleeps from Fitbone sleep data
+    Create UP sleeps from Fitbit sleep data
 
     :param fitbone_user: User object
     :param fitbit_sleep: Fitbit sleep JSON
@@ -108,6 +99,40 @@ def make_sleep(fitbone_user, fitbit_sleep):
                 '%s - %s' % (upr.status_code, upr.json()))
 
 
+def make_steps(fitbone_user, fitbit_steps):
+    """
+    Create UP steps from Fitbit step data. Fitbit only gives us 1 data point per
+    day so all the steps will appear in up at noon.
+
+    :param fitbone_user: User object
+    :param fitbit_steps: Fitbit step JSON
+    :return: None
+    :raise StepCreationFailure: if UP doesn't return 200/201
+    """
+    up_tokens = fitbone_user.up_tokens
+    up_oauth = requests_oauthlib.OAuth2Session(keys.up_id, token=up_tokens)
+
+    #
+    # Convert the Fitbit step data into UP timeseries data.
+    #
+    data = []
+    for activity in fitbit_steps['activities-steps']:
+        #
+        # Since we only get one count per day, always put it at noon.
+        #
+        timestamp = to_unixtime('%s 12:00:00' % activity['dateTime'])
+        data.append([timestamp, int(activity['value'])])
+
+    #
+    # Create the steps in UP.
+    #
+    upr = up_oauth.post(
+        'https://jawbone.com/nudge/api/v.1.2/timeseries',
+        data={'data': json.dumps([{'type': 'steps', 'data': data}])})
+    if upr.status_code not in (httplib.OK, httplib.CREATED):
+        raise StepCreationFailure('%s - %s' % (upr.status_code, upr.json()))
+
+
 class GenericEventFailure(Exception):
     """
     Raise if UP generic_event API doesn't return a 201.
@@ -117,6 +142,13 @@ class GenericEventFailure(Exception):
 
 class SleepCreationFailure(Exception):
     """
-    Raise if UP
+    Raise if UP sleep API doesn't return a 200/201.
+    """
+    pass
+
+
+class StepCreationFailure(Exception):
+    """
+    Raise if UP timeseries API doesn't return a 200/201.
     """
     pass
