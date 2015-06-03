@@ -103,7 +103,7 @@ def make_sleep(fitbone_user, fitbit_sleep):
                 'time_created': time_created,
                 'time_completed': time_completed,
                 'ticks': json.dumps(ticks)})
-        if upr.status_code != httplib.OK:
+        if upr.status_code not in (httplib.OK, httplib.CREATED):
             raise SleepCreationFailure(
                 '%s - %s' % (upr.status_code, upr.json()))
 
