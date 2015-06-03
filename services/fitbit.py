@@ -12,6 +12,7 @@ import requests_oauthlib
 def subscribe(fitbone_user):
     """
     Subscribe to a fitbit user's pubsub
+    https://wiki.fitbit.com/display/API/Fitbit+Subscriptions+API
 
     :param fitbone_user: User object
     :return: None
