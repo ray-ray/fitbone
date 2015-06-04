@@ -68,9 +68,8 @@ def make_sleep(fitbone_user, fitbit_sleep):
         tickdepth = None
         time_created = to_unixtime(
             '%s %s' % (datestr, sleep['minuteData'][0]['dateTime']))
-        time_completed = to_unixtime(
-            '%s %s' % (datestr, sleep['minuteData'][-1]['dateTime'])) + 60
         ticks = []
+        ticktime = time_created
 
         #
         # Convert Fitbit's minute data to UP's phase change ticks.
@@ -79,11 +78,11 @@ def make_sleep(fitbone_user, fitbit_sleep):
             depth = value_to_depth[minute['value']]
             if depth != tickdepth:
                 ticks.append({
-                    'time': to_unixtime('%s %s' % (
-                        datestr,
-                        minute['dateTime'])),
+                    'time': ticktime,
                     'depth': depth})
                 tickdepth = depth
+            ticktime += 60
+        time_completed = ticktime
 
         #
         # Create the UP sleep.
