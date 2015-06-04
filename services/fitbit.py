@@ -24,8 +24,7 @@ def subscribe(fitbone_user):
         resource_owner_key=fitbit_tokens['oauth_token'],
         resource_owner_secret=fitbit_tokens['oauth_token_secret'])
     fbr = fitbit_oauth.post(
-        'https://api.fitbit.com/1/user/-/apiSubscriptions/%s.json' %
-        fitbone_user.id)
+        'https://api.fitbit.com/1/user/-/apiSubscriptions/1.json')
 
     #
     # Make sure subscription succeeds.
