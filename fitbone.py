@@ -120,22 +120,6 @@ def fitbit_authorized():
     return up_login()
 
 
-# @app.route('/fitbit_profile')
-# def fitbit_profile():
-#     """
-#     Display profile data from Fitbit
-#
-#     :return: print the JSON to verify
-#     """
-#     oauth = requests_oauthlib.OAuth1Session(
-#         FITBIT['client_key'],
-#         client_secret=FITBIT['client_secret'],
-#         resource_owner_key=RAY_FITBIT['resource_owner_key'],
-#         resource_owner_secret=RAY_FITBIT['resource_owner_secret'])
-#     r = oauth.get('https://api.fitbit.com/1/user/-/profile.json')
-#     return '%s' % r.json()
-
-
 @app.route('/up_login')
 def up_login():
     """
@@ -200,8 +184,11 @@ def translate():
 
     :return: 200 response
     """
-    jmsg = boto.sqs.jsonmessage.JSONMessage(body=flask.request.get_data())
-    events = jmsg.decode(jmsg.get_body())
+    if keys.debug:
+        events = flask.request.json
+    else:
+        jmsg = boto.sqs.jsonmessage.JSONMessage(body=flask.request.get_data())
+        events = jmsg.decode(jmsg.get_body())
     for event in events:
         fitbone_user = services.user.get_fitbit_user(event['ownerId'])
         if event['collectionType'] == 'sleep':
