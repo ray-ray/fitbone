@@ -33,6 +33,28 @@ def subscribe(fitbone_user):
         raise SubscriptionFailure('%s - %s' % (fbr.status_code, fbr.json()))
 
 
+def get_profile(fitbone_user):
+    """
+    Get the fitbit profile data (mostly for timezone).
+    https://wiki.fitbit.com/display/API/API-Get-User-Info
+
+    :param fitbone_user: User object
+    :return: profile JSON
+    :raise ProfileFailure: non-200 response from API
+    """
+    fitbit_tokens = fitbone_user.fitbit_tokens
+    fitbit_oauth = requests_oauthlib.OAuth1Session(
+        keys.fitbit_key,
+        keys.fitbit_secret,
+        resource_owner_key=fitbit_tokens['oauth_token'],
+        resource_owner_secret=fitbit_tokens['oauth_token_secret'])
+    fbr = fitbit_oauth.get('https://api.fitbit.com/1/user/-/profile.json')
+    if fbr.status_code == httplib.OK:
+        return fbr.json()
+    else:
+        raise ProfileFailure('%s-%s' % (fbr.status_code, fbr.json()))
+
+
 def get_sleep(fitbone_user, day):
     """
     Get the fitbit sleep data for a given day.
@@ -84,6 +106,13 @@ def get_steps(fitbone_user, day):
 class SubscriptionFailure(Exception):
     """
     Raise this if Fitbit's subscription API doesn't return a 200/201.
+    """
+    pass
+
+
+class ProfileFailure(Exception):
+    """
+    Raise this if Fitbit's profile API doesn't return a 200.
     """
     pass
 

@@ -8,7 +8,9 @@ import datetime
 import httplib
 import json
 import keys
+import pytz
 import requests_oauthlib
+import services.fitbit
 import time
 
 
@@ -38,16 +40,21 @@ def generic(fitbone_user, note):
 value_to_depth = {'1': 3, '2': 2, '3': 1}
 
 
-def to_unixtime(datestr):
+def to_unixtime(datestr, tzstr):
     """
     Convert YYYY-MM-DD HH:MM:SS to unix time
 
     :param datestr: YYYY-MM-DD HH:MM:SS
+    :param tzstr: timezone string from Fitbit
     :return: unixtime
     """
-    return time.mktime(datetime.datetime.strptime(
-        datestr,
-        '%Y-%m-%d %H:%M:%S').timetuple())
+    ptz = pytz.timezone(tzstr)
+    dt = datetime.datetime.strptime(datestr, '%Y-%m-%d %H:%M:%S')
+    ldt = ptz.localize(dt)
+    return time.mktime(ldt.timetuple())
+    # return time.mktime(datetime.datetime.strptime(
+    #     datestr,
+    #     '%Y-%m-%d %H:%M:%S').timetuple())
 
 
 def make_sleep(fitbone_user, fitbit_sleep):
@@ -58,6 +65,8 @@ def make_sleep(fitbone_user, fitbit_sleep):
     :param fitbit_sleep: Fitbit sleep JSON
     :return: None
     """
+    fitbit_profile = services.fitbit.get_profile(fitbone_user)
+    timezone = fitbit_profile['user']['timezone']
     up_tokens = fitbone_user.up_tokens
     up_oauth = requests_oauthlib.OAuth2Session(keys.up_id, token=up_tokens)
     for sleep in fitbit_sleep['sleep']:
@@ -67,7 +76,8 @@ def make_sleep(fitbone_user, fitbit_sleep):
         datestr = sleep['startTime'][:10]
         tickdepth = None
         time_created = to_unixtime(
-            '%s %s' % (datestr, sleep['minuteData'][0]['dateTime']))
+            '%s %s' % (datestr, sleep['minuteData'][0]['dateTime']),
+            timezone)
         ticks = []
         ticktime = time_created
 
@@ -108,6 +118,9 @@ def make_steps(fitbone_user, fitbit_steps):
     :return: None
     :raise StepCreationFailure: if UP doesn't return 200/201
     """
+    fitbit_profile = services.fitbit.get_profile(fitbone_user)
+    timezone = fitbit_profile['user']['timezone']
+
     up_tokens = fitbone_user.up_tokens
     up_oauth = requests_oauthlib.OAuth2Session(keys.up_id, token=up_tokens)
 
@@ -119,7 +132,7 @@ def make_steps(fitbone_user, fitbit_steps):
         #
         # Since we only get one count per day, always put it at noon.
         #
-        timestamp = to_unixtime('%s 12:00:00' % activity['dateTime'])
+        timestamp = to_unixtime('%s 12:00:00' % activity['dateTime'], timezone)
         data.append([timestamp, int(activity['value'])])
 
     #
