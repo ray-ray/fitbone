@@ -4,6 +4,7 @@ Wrapper around UP APIs
 __author__ = 'rcourtney'
 
 
+import calendar
 import datetime
 import httplib
 import json
@@ -11,7 +12,7 @@ import keys
 import pytz
 import requests_oauthlib
 import services.fitbit
-import time
+# import time
 
 
 def generic(fitbone_user, note):
@@ -51,7 +52,9 @@ def to_unixtime(datestr, tzstr):
     ptz = pytz.timezone(tzstr)
     dt = datetime.datetime.strptime(datestr, '%Y-%m-%d %H:%M:%S')
     ldt = ptz.localize(dt)
-    return time.mktime(ldt.timetuple())
+    udt = ldt.astimezone(pytz.utc)
+    return calendar.timegm(udt.timetuple())
+    # return time.mktime(ldt.timetuple())
     # return time.mktime(datetime.datetime.strptime(
     #     datestr,
     #     '%Y-%m-%d %H:%M:%S').timetuple())
