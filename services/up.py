@@ -35,10 +35,10 @@ def generic(fitbone_user, note):
 #
 # Translate Fitbit sleep values to UP sleep depth
 # asleep -> sound
-# awake -> light
+# awake -> awake
 # really awake -> awake
 #
-value_to_depth = {'1': 3, '2': 2, '3': 1}
+value_to_depth = {'1': 3, '2': 1, '3': 1}
 
 
 def to_unixtime(datestr, tzstr):
