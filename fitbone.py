@@ -160,11 +160,8 @@ def up_authorized():
     # Update the user's creds and subscribe to Fitbit pubsub.
     #
     fitbone_user = services.user.get_user(flask.session['uid'])
-    print 'user: %s' % fitbone_user
     services.user.update_up_creds(fitbone_user, tokens)
-    print 'updated'
     services.fitbit.subscribe(fitbone_user)
-    print 'subscribed'
     return 'Your Fitbit is now connected to UP!'
 
 
