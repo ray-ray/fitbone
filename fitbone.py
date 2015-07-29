@@ -90,7 +90,7 @@ def fitbit_authorized():
     """
     Callback from Fitbit to finish the oauth handshake
 
-    :return: Print out keys for now
+    :return: render the UP login
     """
     uid = flask.session['uid']
     temp_user = services.user.get_user(uid)
@@ -141,7 +141,7 @@ def up_authorized():
     """
     Callback from UP to finish oauth handshake
 
-    :return: Print out token for now
+    :return: Print out connected
     """
     oauth = requests_oauthlib.OAuth2Session(UP['client_id'])
 
@@ -184,28 +184,22 @@ def translate():
 
     :return: 200 response
     """
-    print 'DEBUG: %s' % keys.debug
     if keys.debug:
         events = flask.request.json
     else:
         jmsg = boto.sqs.jsonmessage.JSONMessage(body=flask.request.get_data())
         events = jmsg.decode(jmsg.get_body())
-    print 'EVENTS: %s' % events
     for event in events:
-        print 'EVENT: %s' % events
         fitbone_user = services.user.get_fitbit_user(event['ownerId'])
-        print 'USER: %s' % fitbone_user
         if event['collectionType'] == 'sleep':
             fitbit_sleep = services.fitbit.get_sleep(
                 fitbone_user,
                 event['date'])
-            print 'SLEEP: %s' % fitbit_sleep
             services.up.make_sleep(fitbone_user, fitbit_sleep)
         elif event['collectionType'] == 'activities':
             fitbit_steps = services.fitbit.get_steps(
                 fitbone_user,
                 event['date'])
-            print 'STEPS: %s' % fitbit_steps
             services.up.make_steps(fitbone_user, fitbit_steps)
         elif keys.debug:
             #
@@ -214,7 +208,6 @@ def translate():
             #
             message = json.dumps(event)
             services.up.generic(fitbone_user, message)
-        print 'DONE'
     return ''
 
 
@@ -223,7 +216,7 @@ def hello():
     """
     App homepage
 
-    :return: print text to verify server is running
+    :return: Hello World
     """
     return "Hello World!"
 
