@@ -6,10 +6,43 @@ __author__ = 'rcourtney'
 
 import data.user
 import datetime
+import decorator
+import sqlalchemy.exc
+import traceback
+
 import fitbone
 db = fitbone.db
 
+#
+# Maximum number of times to retry the database connection.
+#
+MAX_RETRIES = 3
 
+
+@decorator.decorator
+def retry_connection(func, *args, **kwargs):
+    """
+    Decorator to retry a failed DB connection.
+
+    :param func: function to retry
+    :param args: args passed to the function
+    :param kwargs: kwargs passed to the function
+    :return: return value of the function
+    """
+    attempts = 0
+    while attempts < MAX_RETRIES:
+        print 'ATTEMPT %s' % attempts
+        try:
+            return func(*args, **kwargs)
+        except (sqlalchemy.exc.OperationalError, sqlalchemy.exc.StatementError):
+            traceback.print_exc()
+            db.session.rollback()
+            attempts += 1
+            if attempts >= MAX_RETRIES:
+                raise
+
+
+@retry_connection
 def create_temp_user(temp_tokens):
     """
     Create a user with temporary fitbit credentials.
@@ -23,6 +56,7 @@ def create_temp_user(temp_tokens):
     return temp_user
 
 
+@retry_connection
 def get_user(uid):
     """
     Get a user by primary key.
@@ -33,6 +67,7 @@ def get_user(uid):
     return data.user.User.query.get(uid)
 
 
+@retry_connection
 def get_fitbit_user(fitbit_id):
     """
     Get a user by fitbit_id.
@@ -43,6 +78,7 @@ def get_fitbit_user(fitbit_id):
     return data.user.User.query.filter_by(fitbit_id=fitbit_id).first()
 
 
+@retry_connection
 def update_fitbit_creds(fitbit_user, fitbit_tokens):
     """
     Update the fitbit id and tokens.
@@ -79,6 +115,7 @@ def update_fitbit_creds(fitbit_user, fitbit_tokens):
     return fitbit_user
 
 
+@retry_connection
 def update_up_creds(fitbone_user, up_tokens):
     """
     Update the UP tokens.
@@ -92,6 +129,7 @@ def update_up_creds(fitbone_user, up_tokens):
     return fitbone_user
 
 
+@retry_connection
 def remove_user(fitbone_user):
     """
     Soft delete a user.
