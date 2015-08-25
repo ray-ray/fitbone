@@ -14,6 +14,7 @@ import keys
 import requests_oauthlib
 import services.fitbit
 import services.up
+import time
 
 
 #
@@ -112,6 +113,7 @@ def fitbit_authorized():
     while (temp_user is None) and (attempts < MAX_RETRIES):
         temp_user = services.user.get_user(uid)
         db.session.rollback()
+        time.sleep(10)
         attempts += 1
     if temp_user is None:
         raise TempUserFailure
