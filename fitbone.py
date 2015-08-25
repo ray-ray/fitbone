@@ -111,6 +111,7 @@ def fitbit_authorized():
     attempts = 0
     while (temp_user is None) and (attempts < MAX_RETRIES):
         temp_user = services.user.get_user(uid)
+        db.session.rollback()
         attempts += 1
     if temp_user is None:
         raise TempUserFailure
