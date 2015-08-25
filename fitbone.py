@@ -57,6 +57,7 @@ UP = {
     'authorization_url': 'https://jawbone.com/auth/oauth2/auth',
     'request_token_url': 'https://jawbone.com/auth/oauth2/token'
 }
+MAX_RETRIES = 3
 
 
 @app.route('/fitbit_login')
@@ -85,6 +86,13 @@ def fitbit_login():
     return flask.redirect(authorization_url)
 
 
+class TempUserFailure(Exception):
+    """
+    Raise this if we fail to get a temp user record when trying to auth.
+    """
+    pass
+
+
 @app.route('/fitbit_authorized')
 def fitbit_authorized():
     """
@@ -94,7 +102,18 @@ def fitbit_authorized():
     """
     uid = flask.session['uid']
     print 'UID: %s' % uid
-    temp_user = services.user.get_user(uid)
+
+    #
+    # Sometimes the commit hasn't finished before the callback is executed, so
+    # retry if getting None.
+    #
+    temp_user = None
+    attempts = 0
+    while (temp_user is None) and (attempts < MAX_RETRIES):
+        temp_user = services.user.get_user(uid)
+    if temp_user is None:
+        raise TempUserFailure
+
     print 'TEMP_USER %s' % temp_user
     temp_tokens = temp_user.fitbit_tokens
     print 'TEMP_TOKENS %s' % temp_tokens
