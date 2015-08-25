@@ -93,9 +93,13 @@ def fitbit_authorized():
     :return: render the UP login
     """
     uid = flask.session['uid']
+    print 'UID: %s' % uid
     temp_user = services.user.get_user(uid)
+    print 'TEMP_USER %s' % temp_user
     temp_tokens = temp_user.fitbit_tokens
+    print 'TEMP_TOKENS %s' % temp_tokens
     verifier = flask.request.args.get('oauth_verifier')
+    print 'VERIFIER %s' % verifier
 
     #
     # Finish the handshake with the verifier and the temp tokens.
@@ -106,7 +110,9 @@ def fitbit_authorized():
         resource_owner_key=temp_tokens['oauth_token'],
         resource_owner_secret=temp_tokens['oauth_token_secret'],
         verifier=verifier)
+    print 'OAUTH %s' % oauth
     oauth_tokens = oauth.fetch_access_token(FITBIT['access_token_url'])
+    print 'OAUTH TOKENS %s' % oauth_tokens
 
     #
     # Update the user record with the permanent Fitbit tokens and id. Re-set the
@@ -116,7 +122,9 @@ def fitbit_authorized():
     fitbit_user = services.user.update_fitbit_creds(
         temp_user,
         oauth_tokens)
+    print 'FITBIT USER %s' % fitbit_user
     flask.session['uid'] = fitbit_user.id
+    print 'UID %s' % flask.session['uid']
     return up_login()
 
 
@@ -131,8 +139,11 @@ def up_login():
         UP['client_id'],
         redirect_uri=UP['redirect_uri'],
         scope=UP['scope'])
+    print 'UP OAUTH %s' % oauth
     authorization_url, state = oauth.authorization_url(
         UP['authorization_url'])
+    print 'AUTH URL %s' % authorization_url
+    print 'STATE %s' % state
     return flask.redirect(authorization_url)
 
 
