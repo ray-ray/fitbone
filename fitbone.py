@@ -108,15 +108,18 @@ def fitbit_authorized():
     # Sometimes the commit hasn't finished before the callback is executed, so
     # retry if getting None.
     #
-    temp_user = None
-    attempts = 0
-    while (temp_user is None) and (attempts < MAX_RETRIES):
-        temp_user = services.user.get_user(uid)
-        db.session.rollback()
-        time.sleep(10)
-        attempts += 1
+    # temp_user = None
+    # attempts = 0
+    # while (temp_user is None) and (attempts < MAX_RETRIES):
+    #     temp_user = services.user.get_user(uid)
+    #     db.session.rollback()
+    #     time.sleep(10)
+    #     attempts += 1
+
+    temp_user = services.user.get_user(uid)
     if temp_user is None:
-        raise TempUserFailure
+        return flask.redirect(flask.request.url)
+        #raise TempUserFailure
 
     print 'TEMP_USER %s' % temp_user
     temp_tokens = temp_user.fitbit_tokens
