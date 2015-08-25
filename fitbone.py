@@ -125,15 +125,22 @@ def fitbit_authorized():
     print 'FITBIT USER %s' % fitbit_user
     flask.session['uid'] = fitbit_user.id
     print 'UID %s' % flask.session['uid']
-    return up_login()
+    up_auth_url =  get_up_auth()
+    print 'UP AUTH URL %s' % up_auth_url
+    return flask.redirect(up_auth_url)
 
 
 @app.route('/up_login')
 def up_login():
-    """
-    Redirect to the UP login for approval
+    up_auth_url = get_up_auth()
+    return flask.redirect(up_auth_url)
 
-    :return: Flask redirect
+
+def get_up_auth():
+    """
+    Get the UP oauth URL.
+
+    :return: UP oauth authorization URL
     """
     oauth = requests_oauthlib.OAuth2Session(
         UP['client_id'],
@@ -144,7 +151,7 @@ def up_login():
         UP['authorization_url'])
     print 'AUTH URL %s' % authorization_url
     print 'STATE %s' % state
-    return flask.redirect(authorization_url)
+    return authorization_url
 
 
 @app.route('/up_authorized')
