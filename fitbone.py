@@ -14,7 +14,6 @@ import keys
 import requests_oauthlib
 import services.fitbit
 import services.up
-import time
 
 
 #
@@ -87,13 +86,6 @@ def fitbit_login():
     return flask.redirect(authorization_url)
 
 
-class TempUserFailure(Exception):
-    """
-    Raise this if we fail to get a temp user record when trying to auth.
-    """
-    pass
-
-
 @app.route('/fitbit_authorized')
 def fitbit_authorized():
     """
@@ -102,30 +94,19 @@ def fitbit_authorized():
     :return: render the UP login
     """
     uid = flask.session['uid']
-    print 'UID: %s' % uid
 
     #
-    # Sometimes the commit hasn't finished before the callback is executed, so
-    # retry if getting None.
+    # Sometimes the callback hits the server before the DB insert is finished.
+    # In this case, just try the request again.
     #
-    # temp_user = None
-    # attempts = 0
-    # while (temp_user is None) and (attempts < MAX_RETRIES):
-    #     temp_user = services.user.get_user(uid)
-    #     db.session.rollback()
-    #     time.sleep(10)
-    #     attempts += 1
-
+    # TODO: Using the DB for temp users is sort of silly. This should just be
+    # maintained in the Flask session.
     temp_user = services.user.get_user(uid)
     if temp_user is None:
         return flask.redirect(flask.request.url)
-        #raise TempUserFailure
 
-    print 'TEMP_USER %s' % temp_user
     temp_tokens = temp_user.fitbit_tokens
-    print 'TEMP_TOKENS %s' % temp_tokens
     verifier = flask.request.args.get('oauth_verifier')
-    print 'VERIFIER %s' % verifier
 
     #
     # Finish the handshake with the verifier and the temp tokens.
@@ -136,9 +117,7 @@ def fitbit_authorized():
         resource_owner_key=temp_tokens['oauth_token'],
         resource_owner_secret=temp_tokens['oauth_token_secret'],
         verifier=verifier)
-    print 'OAUTH %s' % oauth
     oauth_tokens = oauth.fetch_access_token(FITBIT['access_token_url'])
-    print 'OAUTH TOKENS %s' % oauth_tokens
 
     #
     # Update the user record with the permanent Fitbit tokens and id. Re-set the
@@ -148,16 +127,18 @@ def fitbit_authorized():
     fitbit_user = services.user.update_fitbit_creds(
         temp_user,
         oauth_tokens)
-    print 'FITBIT USER %s' % fitbit_user
     flask.session['uid'] = fitbit_user.id
-    print 'UID %s' % flask.session['uid']
-    up_auth_url =  get_up_auth()
-    print 'UP AUTH URL %s' % up_auth_url
+    up_auth_url = get_up_auth()
     return flask.redirect(up_auth_url)
 
 
 @app.route('/up_login')
 def up_login():
+    """
+    Redirect to the UP OAuth URL.
+
+    :return: Flask redirect
+    """
     up_auth_url = get_up_auth()
     return flask.redirect(up_auth_url)
 
@@ -172,11 +153,8 @@ def get_up_auth():
         UP['client_id'],
         redirect_uri=UP['redirect_uri'],
         scope=UP['scope'])
-    print 'UP OAUTH %s' % oauth
     authorization_url, state = oauth.authorization_url(
         UP['authorization_url'])
-    print 'AUTH URL %s' % authorization_url
-    print 'STATE %s' % state
     return authorization_url
 
 
