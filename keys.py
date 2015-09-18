@@ -10,6 +10,7 @@ import os
 
 aws_key = os.environ['AWS_KEY']
 aws_secret = os.environ['AWS_SECRET']
+aws_region = os.environ['AWS_REGION']
 queue_name = os.environ['QUEUE_NAME']
 
 fitbit_key = os.environ['FITBIT_KEY']

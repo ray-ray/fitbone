@@ -31,24 +31,17 @@ class User(db.Model):
         nullable=False)
     time_removed = db.Column(db.DateTime(timezone=True))
 
-    def __init__(
-            self,
-            fitbit_tokens,
-            fitbit_id=None,
-            up_tokens=None):
+    def __init__(self, fitbit_tokens, up_tokens):
         """
-        User object with temporary fitbit credentials.
+        User object with fitbit and UP credentials.
 
         :param fitbit_tokens: fitbit api oauth tokens
-        :param fitbit_id: fitbit user id
         :param up_tokens: UP oauth tokens
         :return: User object
         """
         self.fitbit_tokens = fitbit_tokens
-        if fitbit_id is not None:
-            self.fitbit_id = fitbit_id
-        if up_tokens is not None:
-            self.up_tokens = up_tokens
+        self.fitbit_id = fitbit_tokens['encoded_user_id']
+        self.up_tokens = up_tokens
 
     @sqlalchemy.ext.hybrid.hybrid_property
     def fitbit_tokens(self):

@@ -36,7 +36,7 @@ import services.user
 # Connect to the SQS queue
 #
 conn = boto.sqs.connect_to_region(
-    "us-east-1",
+    keys.aws_region,
     aws_access_key_id=keys.aws_key,
     aws_secret_access_key=keys.aws_secret)
 fbq = conn.get_queue(keys.queue_name)
@@ -75,8 +75,7 @@ def fitbit_login():
     #
     # Store the temp tokens
     #
-    temp_user = services.user.create_temp_user(fetch_response)
-    flask.session['uid'] = temp_user.id
+    flask.session['tokens'] = fetch_response
 
     #
     # Redirect to fitbit login
@@ -93,19 +92,7 @@ def fitbit_authorized():
 
     :return: render the UP login
     """
-    uid = flask.session['uid']
-
-    #
-    # Sometimes the callback hits the server before the DB insert is finished.
-    # In this case, just try the request again.
-    #
-    # TODO: Using the DB for temp users is sort of silly. This should just be
-    # maintained in the Flask session.
-    temp_user = services.user.get_user(uid)
-    if temp_user is None:
-        return flask.redirect(flask.request.url)
-
-    temp_tokens = temp_user.fitbit_tokens
+    temp_tokens = flask.session['tokens']
     verifier = flask.request.args.get('oauth_verifier')
 
     #
@@ -120,14 +107,9 @@ def fitbit_authorized():
     oauth_tokens = oauth.fetch_access_token(FITBIT['access_token_url'])
 
     #
-    # Update the user record with the permanent Fitbit tokens and id. Re-set the
-    # session uid in case we were updating a pre-existing user. Then start the
-    # UP oauth flow.
+    # Store the fitbit oauth tokens and redirect to UP oauth.
     #
-    fitbit_user = services.user.update_fitbit_creds(
-        temp_user,
-        oauth_tokens)
-    flask.session['uid'] = fitbit_user.id
+    flask.session['tokens'] = oauth_tokens
     up_auth_url = get_up_auth()
     return flask.redirect(up_auth_url)
 
@@ -179,10 +161,12 @@ def up_authorized():
         client_secret=UP['client_secret'])
 
     #
-    # Update the user's creds and subscribe to Fitbit pubsub.
+    # Create the user or update the tokens for an existing user. Then set up
+    # the fitbit subscription.
     #
-    fitbone_user = services.user.get_user(flask.session['uid'])
-    services.user.update_up_creds(fitbone_user, tokens)
+    fitbone_user = services.user.create_or_update_user(
+        flask.session['tokens'],
+        tokens)
     services.fitbit.subscribe(fitbone_user)
     return 'Your Fitbit is now connected to UP!'
 
